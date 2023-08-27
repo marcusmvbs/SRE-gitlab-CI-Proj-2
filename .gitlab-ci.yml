@@ -122,7 +122,7 @@ ansible_configure:
     - |
       if ! helm list -n default --all --short | grep -q "^$POSTGRES_RELEASE$"; then
        echo "Installing Helm chart $POSTGRES_RELEASE..."
-       helm install $POSTGRES_RELEASE bitnami/postgresql --namespace default --version 10.4.0
+       helm install $POSTGRES_RELEASE bitnami/postgresql --namespace default
       else
         echo "Helm chart $POSTGRES_RELEASE is already installed"
       fi
