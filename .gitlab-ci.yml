@@ -46,8 +46,8 @@ validate:
   stage: validate
   script:
     - terraform validate
-  except:
-    - branches@projects_mvbs/sre-gitlabci-proj-2
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
 plan:
   stage: plan
@@ -59,8 +59,8 @@ plan:
     paths:
       - terraform/planfile
       - terraform/default.tfstate
-  except:
-    - branches@projects_mvbs/sre-gitlabci-proj-2
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
 apply:
   stage: apply
@@ -72,8 +72,8 @@ apply:
   needs:
     - job: plan
       artifacts: true
-  except:
-    - branches@projects_mvbs/sre-gitlabci-proj-2
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
 ansible_configure:
   stage: ansible_configure
@@ -82,11 +82,33 @@ ansible_configure:
     - ansible-playbook -i inventory.ini playbook.yaml
     - gcloud container clusters get-credentials primary --zone=us-central1-a --project=pioneering-rex-394919
 
+    # Check if nginx server Helm chart is already installed
+
+   # - helm install redis bitnami/redis
+   # - helm install postgresql bitnami/postgresql
+    # Check if nginx-ingress Helm chart is already installed
+    # - |
+    #   RELEASE_NAME=my-ingress-ctrl
+    #   if ! helm list -n ingress --all --short | grep -q "^$RELEASE_NAME$"; then
+    #     echo "Installing Helm chart $RELEASE_NAME..."
+    #     helm install $RELEASE_NAME ingress-nginx/ingress-nginx --namespace default --version 4.7.1 
+    #   else
+    #     echo "Helm chart $RELEASE_NAME is already installed"
+    #   fi
+
+   # - helm install k10 kasten/k10
+   # - helm install fluent-bit fluent/fluent-bit
+   # - helm install prometheus prometheus-community/prometheus
+
+    - kubectl create namespace argocd
+    - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+    - kubectl apply -n argocd -f https://raw.githubusercontent.com/marcusmvbs/SRE-argoCD-Proj-2/main/charts/application.yaml
+
   needs:
     - job: apply
       artifacts: true
-  except:
-    - branches@projects_mvbs/sre-gitlabci-proj-2
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
 destroy:
   stage: destroy
@@ -95,5 +117,5 @@ destroy:
   dependencies:
     - plan
   when: manual
-  except:
-    - branches@projects_mvbs/sre-gitlabci-proj-2
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
