@@ -155,8 +155,8 @@ ansible_configure:
       fi
 
     - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-    - kubectl apply -n argocd -f https://raw.githubusercontent.com/marcusmvbs/SRE-argoCD-Proj-2/main/charts/application.yaml
-
+    - kubectl apply -f application.yaml
+   
   needs:
     - job: apply
       artifacts: true
