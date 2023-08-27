@@ -1,8 +1,9 @@
 ---
 - name: Update pkg & install Openssl Helm on localhost
   hosts: terraform-host
-  become: yes # to ensure they are executed with elevated privileges (root) if required
+  become: yes # exec as root
   tasks:
+    # Basic tasks to install helm 
     - name: Update package repositories
       community.general.apk:
         update_cache: yes
@@ -20,9 +21,56 @@
     - name: Display Helm installation status
       debug:
         msg: "Helm {{ 'installed' if helm_install_result.stdout_lines else 'already installed' }}"
+    
+    # Helm repo tasks
+
+    - name: Add Redis/SQL/nginx-server Database Helm Repository
+      ansible.builtin.command: helm repo add bitnami https://charts.bitnami.com/bitnami
 
     - name: Add Helm repository nginx-ingress controller
       ansible.builtin.command: helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 
-    - name: Update Helm repositories
+    - name: Add Kasten Helm Repository
+      ansible.builtin.command: helm repo add kasten https://charts.kasten.io/
+
+    - name: Add Fluent Bit Helm Repository
+      ansible.builtin.command: helm repo add fluent https://fluent.github.io/helm-charts
+
+    - name: Add Prometheus Helm Repository
+      ansible.builtin.command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+    - name: Search Helm Charts
+      ansible.builtin.command: helm search repo
+
+    - name: Update Helm Repositories
       ansible.builtin.command: helm repo update
+
+    # Helm install tasks
+
+    - name: Install Bitnami Redis Helm Chart
+      ansible.builtin.command: helm install redis bitnami/redis
+
+    - name: Install Bitnami PostgreSQL Helm Chart
+      ansible.builtin.command: helm install postgresql bitnami/postgresql
+
+    - name: Install Bitnami Nginx Server Helm Chart
+      ansible.builtin.command: helm install nginx bitnami/nginx
+
+    # - name: Wait for Nginx Deployment to be Ready
+    #   ansible.builtin.uri:
+    #     url: http://localhost
+    #     return_content: no
+    #     status_code: 200
+    #     timeout: 300
+
+    - name: Install Ingress-Nginx Helm Chart
+      ansible.builtin.command: helm install ingress-nginx ingress-nginx/ingress-nginx
+
+    - name: Install Kasten Helm Chart
+      ansible.builtin.command: helm install k10 kasten/k10
+
+    - name: Install Fluent Bit Helm Chart
+      ansible.builtin.command: helm install fluent-bit fluent/fluent-bit
+
+    - name: Install Prometheus Helm Chart
+      ansible.builtin.command: helm install prometheus prometheus-community/prometheus
