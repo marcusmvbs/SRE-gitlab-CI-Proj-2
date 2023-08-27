@@ -5,9 +5,9 @@ image:
     - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' 
 
 stages:
- # - validate
- # - plan
- # - apply
+  - validate
+  - plan
+  - apply
   - ansible_configure
   - destroy
 
