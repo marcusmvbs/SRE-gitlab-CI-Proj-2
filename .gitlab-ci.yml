@@ -46,8 +46,8 @@ validate:
   stage: validate
   script:
     - terraform validate
-  except:
-    - main
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
 plan:
   stage: plan
@@ -59,8 +59,8 @@ plan:
     paths:
       - terraform/planfile
       - terraform/default.tfstate
-  except:
-    - main
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
 apply:
   stage: apply
@@ -72,8 +72,8 @@ apply:
   needs:
     - job: plan
       artifacts: true
-  except:
-    - main
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
 ansible_configure:
   stage: ansible_configure
@@ -85,8 +85,8 @@ ansible_configure:
   needs:
     - job: apply
       artifacts: true
-  except:
-    - main
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
 destroy:
   stage: destroy
@@ -95,5 +95,5 @@ destroy:
   dependencies:
     - plan
   when: manual
-  except:
-    - main
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
