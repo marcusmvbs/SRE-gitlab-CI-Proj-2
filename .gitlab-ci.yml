@@ -82,13 +82,34 @@ ansible_configure:
     - ansible-playbook -i inventory.ini playbook.yaml
     - gcloud container clusters get-credentials primary --zone=us-central1-a --project=pioneering-rex-394919
 
-    - helm install redis bitnami/redis
-    - helm install postgresql bitnami/postgresql
-    - helm install nginx bitnami/nginx
-    - helm install ingress-nginx ingress-nginx/ingress-nginx
-    - helm install k10 kasten/k10
-    - helm install fluent-bit fluent/fluent-bit
-    - helm install prometheus prometheus-community/prometheus
+    
+
+    # Check if nginx server Helm chart is already installed
+    - |
+      RELEASE_NAME=nginx-web
+      if ! helm list -n default --all --short | grep -q "^$RELEASE_NAME$"; then
+        echo "Installing Helm chart $RELEASE_NAME..."
+        helm install $RELEASE_NAME $CHART_REPO --namespace default
+      else
+        echo "Helm chart $RELEASE_NAME is already installed"
+      fi
+
+
+   # - helm install redis bitnami/redis
+   # - helm install postgresql bitnami/postgresql
+    # Check if nginx-ingress Helm chart is already installed
+    # - |
+    #   RELEASE_NAME=my-ingress-ctrl
+    #   if ! helm list -n ingress --all --short | grep -q "^$RELEASE_NAME$"; then
+    #     echo "Installing Helm chart $RELEASE_NAME..."
+    #     helm install $RELEASE_NAME ingress-nginx/ingress-nginx --namespace default --version 4.7.1 
+    #   else
+    #     echo "Helm chart $RELEASE_NAME is already installed"
+    #   fi
+
+   # - helm install k10 kasten/k10
+   # - helm install fluent-bit fluent/fluent-bit
+   # - helm install prometheus prometheus-community/prometheus
 
     - kubectl create namespace argocd
     - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
