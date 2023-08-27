@@ -81,6 +81,8 @@ ansible_configure:
     - cd ../ansible/
     - ansible-playbook -i inventory.ini playbook.yaml
     - gcloud container clusters get-credentials primary --zone=us-central1-a --project=pioneering-rex-394919
+    - kubectl create namespace argocd
+    - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
   needs:
     - job: apply
