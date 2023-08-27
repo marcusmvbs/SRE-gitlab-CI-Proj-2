@@ -62,6 +62,8 @@ plan:
     paths:
       - terraform/planfile
       - terraform/default.tfstate
+  except:
+    - branches@projects_mvbs/sre-gitlabci-proj-2
 
 apply:
   stage: apply
@@ -73,6 +75,8 @@ apply:
   needs:
     - job: plan
       artifacts: true
+  except:
+    - branches@projects_mvbs/sre-gitlabci-proj-2
 
 ansible_configure:
   stage: ansible_configure
@@ -122,6 +126,8 @@ ansible_configure:
   needs:
     - job: apply
       artifacts: true
+  except:
+    - branches@projects_mvbs/sre-gitlabci-proj-2
 
 destroy:
   stage: destroy
@@ -130,3 +136,5 @@ destroy:
   dependencies:
     - plan
   when: manual
+  except:
+    - branches@projects_mvbs/sre-gitlabci-proj-2
