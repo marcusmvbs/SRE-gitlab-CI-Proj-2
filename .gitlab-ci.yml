@@ -1,0 +1,140 @@
+image:
+  name: hashicorp/terraform:light
+  entrypoint:
+    - '/usr/bin/env'
+    - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' 
+
+stages:
+  - validate
+  - plan
+  - apply
+  - ansible_configure
+  - destroy
+
+variables:
+  KUBE_CONFIG_PATH: "/builds/projects_mvbs/gcp-iac-gitlab/ansible/templates"
+
+before_script: 
+  - apk update
+  - apk add --no-cache gnupg python3 py3-crcmod py3-pip
+  - pip install google-auth google-auth-httplib2 google-auth-oauthlib
+  - apk add --no-cache ansible curl
+  - ansible-galaxy collection install kubernetes.core
+
+  - mkdir -p ./creds
+  - echo $serviceaccount | base64 -d > ./creds/service_account.json
+
+  - curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-443.0.0-linux-x86_64.tar.gz
+  - tar -xzf google-cloud-cli-443.0.0-linux-x86_64.tar.gz -C /usr/local/
+  - ln -s /usr/local/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud # folder link
+
+  - gcloud components install kubectl
+  - gcloud components update
+  - gcloud config set core/disable_usage_reporting true
+  - gcloud config set component_manager/disable_update_check true
+  - gcloud --version
+  - gcloud auth activate-service-account --key-file=./creds/service_account.json
+
+  - echo 'export PATH=$PATH:/usr/local/google-cloud-sdk/bin' >> /etc/profile
+  - source /etc/profile
+  
+  - cd terraform/
+  - /usr/local/google-cloud-sdk/bin/gsutil cp gs://tf-state-bucket-mvb/default.tfstate .
+  - chmod +x /usr/local/google-cloud-sdk/bin/gsutil
+  - rm -rf .terraform
+  - terraform --version
+  - terraform init
+
+validate:
+  stage: validate
+  script:
+    - terraform validate
+  except:
+    - branches@projects_mvbs/sre-gitlabci-proj-2
+
+plan:
+  stage: plan
+  script:
+    - terraform plan -out "planfile" # Reads the config file and compares to current state
+  dependencies:
+    - validate
+  artifacts:
+    paths:
+      - terraform/planfile
+      - terraform/default.tfstate
+  except:
+    - branches@projects_mvbs/sre-gitlabci-proj-2
+
+apply:
+  stage: apply
+  script:
+    - terraform apply -input=false "planfile"
+  dependencies:
+    - plan
+  when: manual
+  needs:
+    - job: plan
+      artifacts: true
+  except:
+    - branches@projects_mvbs/sre-gitlabci-proj-2
+
+ansible_configure:
+  stage: ansible_configure
+  script:
+    - cd ../ansible/
+    - ansible-playbook -i inventory.ini playbook.yaml
+
+    - helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+    - helm repo add bitnami https://charts.bitnami.com/bitnami
+    - helm repo add nginx-stable https://helm.nginx.com/stable
+    - helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+    - helm repo update
+
+    - gcloud container clusters get-credentials primary --zone=us-central1-a --project=pioneering-rex-394919
+
+    # Check if ingress Helm chart is already installed
+    - |
+      RELEASE_NAME=my-ingress-ctrl
+      if ! helm list -n ingress --all --short | grep -q "^$RELEASE_NAME$"; then
+        echo "Installing Helm chart $RELEASE_NAME..."
+        helm install $RELEASE_NAME ingress-nginx/ingress-nginx --namespace ingress --version 4.7.1 --values values.yaml --create-namespace
+      else
+        echo "Helm chart $RELEASE_NAME is already installed"
+      fi
+
+    # Check if webserver Helm chart is already installed
+    - |
+      CHART_REPO=oci://registry-1.docker.io/bitnamicharts/nginx
+      RELEASE_NAME=nginx-web
+      if ! helm list -n default --all --short | grep -q "^$RELEASE_NAME$"; then
+        echo "Installing Helm chart $RELEASE_NAME..."
+        helm install $RELEASE_NAME $CHART_REPO --namespace default
+      else
+        echo "Helm chart $RELEASE_NAME is already installed"
+      fi
+
+   # - helm install my-postgresql bitnami/postgresql
+
+   # - helm install my-prometheus prometheus-community/prometheus
+
+    - kubectl apply -f $KUBE_CONFIG_PATH/nginx_ingress.yaml
+    - kubectl apply -f $KUBE_CONFIG_PATH/nginx_server.yaml 
+   # - kubectl apply -f $KUBE_CONFIG_PATH/db_postgresql.yaml 
+   # - kubectl apply -f $KUBE_CONFIG_PATH/prometheus.yaml
+
+    - cd ../terraform/
+  needs:
+    - job: apply
+      artifacts: true
+  except:
+    - branches@projects_mvbs/sre-gitlabci-proj-2
+
+destroy:
+  stage: destroy
+  script:
+    - terraform destroy --auto-approve
+  dependencies:
+    - plan
+  when: manual
+  except:
+    - branches@projects_mvbs/sre-gitlabci-proj-2
