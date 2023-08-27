@@ -88,7 +88,7 @@ ansible_configure:
     - NGINX_RELEASE=my-nginx
     - POSTGRES_RELEASE=my-postgresql
     - PROMETHEUS_RELEASE=my-prometheus
-    - INGRESS_NAME=my-ingress-ctrl
+    - INGRESS_NAME=my-ingress
     - KASTEN_RELEASE=my-kasten
 
     # Install Fluent Bit from Helm Repo
@@ -140,7 +140,7 @@ ansible_configure:
     - |
       if ! helm list -n ingress --all --short | grep -q "^$INGRESS_NAME$"; then
         echo "Installing Helm chart $RELEASE_NAME..."
-        helm install $RELEASE_NAME ingress-nginx/ingress-nginx --namespace default --version 4.7.1 
+        helm install $RELEASE_NAME https://kubernetes.github.io/ingress-nginx --namespace default
       else
         echo "Helm chart $RELEASE_NAME is already installed"
       fi
