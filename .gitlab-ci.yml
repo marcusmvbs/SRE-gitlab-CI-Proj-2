@@ -82,18 +82,7 @@ ansible_configure:
     - ansible-playbook -i inventory.ini playbook.yaml
     - gcloud container clusters get-credentials primary --zone=us-central1-a --project=pioneering-rex-394919
 
-    
-
     # Check if nginx server Helm chart is already installed
-    - |
-      RELEASE_NAME=nginx-web
-      if ! helm list -n default --all --short | grep -q "^$RELEASE_NAME$"; then
-        echo "Installing Helm chart $RELEASE_NAME..."
-        helm install $RELEASE_NAME $CHART_REPO --namespace default
-      else
-        echo "Helm chart $RELEASE_NAME is already installed"
-      fi
-
 
    # - helm install redis bitnami/redis
    # - helm install postgresql bitnami/postgresql
