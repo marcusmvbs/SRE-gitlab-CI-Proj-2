@@ -155,7 +155,7 @@ ansible_configure:
       fi
 
     - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-    - kubectl apply -f /builds/projects_mvbs/sre-gitlabci-proj-2/application.yaml
+    - kubectl apply -f ../application.yaml
    
   needs:
     - job: apply
