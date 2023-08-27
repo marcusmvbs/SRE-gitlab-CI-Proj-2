@@ -154,17 +154,14 @@ ansible_configure:
        echo "Helm chart $KASTEN_RELEASE is already installed"
       fi
 
-    # Check if the "argocd" namespace exists
-   # - kubectl create namespace argocd
-
     - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
     - kubectl apply -n argocd -f https://raw.githubusercontent.com/marcusmvbs/SRE-argoCD-Proj-2/main/charts/application.yaml
 
   needs:
     - job: apply
       artifacts: true
- # rules:
- #   - if: '$CI_COMMIT_BRANCH == "main"'
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
 destroy:
   stage: destroy
