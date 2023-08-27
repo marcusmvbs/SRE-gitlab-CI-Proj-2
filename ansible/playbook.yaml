@@ -45,32 +45,4 @@
     - name: Update Helm Repositories
       ansible.builtin.command: helm repo update
 
-    # Helm install tasks
-
-    - name: Install Bitnami Redis Helm Chart
-      ansible.builtin.command: helm install redis bitnami/redis
-
-    - name: Install Bitnami PostgreSQL Helm Chart
-      ansible.builtin.command: helm install postgresql bitnami/postgresql
-
-    - name: Install Bitnami Nginx Server Helm Chart
-      ansible.builtin.command: helm install nginx bitnami/nginx
-
-    # - name: Wait for Nginx Deployment to be Ready
-    #   ansible.builtin.uri:
-    #     url: http://localhost
-    #     return_content: no
-    #     status_code: 200
-    #     timeout: 300
-
-    - name: Install Ingress-Nginx Helm Chart
-      ansible.builtin.command: helm install ingress-nginx ingress-nginx/ingress-nginx
-
-    - name: Install Kasten Helm Chart
-      ansible.builtin.command: helm install k10 kasten/k10
-
-    - name: Install Fluent Bit Helm Chart
-      ansible.builtin.command: helm install fluent-bit fluent/fluent-bit
-
-    - name: Install Prometheus Helm Chart
-      ansible.builtin.command: helm install prometheus prometheus-community/prometheus
+    # Helm install tasks - Work in progress
