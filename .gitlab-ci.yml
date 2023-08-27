@@ -81,6 +81,15 @@ ansible_configure:
     - cd ../ansible/
     - ansible-playbook -i inventory.ini playbook.yaml
     - gcloud container clusters get-credentials primary --zone=us-central1-a --project=pioneering-rex-394919
+
+    - helm install redis bitnami/redis
+    - helm install postgresql bitnami/postgresql
+    - helm install nginx bitnami/nginx
+    - helm install ingress-nginx ingress-nginx/ingress-nginx
+    - helm install k10 kasten/k10
+    - helm install fluent-bit fluent/fluent-bit
+    - helm install prometheus prometheus-community/prometheus
+
     - kubectl create namespace argocd
     - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
