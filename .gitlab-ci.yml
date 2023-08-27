@@ -155,14 +155,8 @@ ansible_configure:
       fi
 
     # Check if the "argocd" namespace exists
-    - |  
-      if ! kubectl get namespaces | grep -q "^argocd "; then
-       echo "Creating namespace argocd..."
-       kubectl create namespace argocd
-      else
-       echo "Namespace argocd already exists"
-      fi
-      
+   # - kubectl create namespace argocd
+
     - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
     - kubectl apply -n argocd -f https://raw.githubusercontent.com/marcusmvbs/SRE-argoCD-Proj-2/main/charts/application.yaml
 
