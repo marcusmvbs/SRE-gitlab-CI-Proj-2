@@ -82,25 +82,78 @@ ansible_configure:
     - ansible-playbook -i inventory.ini playbook.yaml
     - gcloud container clusters get-credentials primary --zone=us-central1-a --project=pioneering-rex-394919
 
-    # Check if nginx server Helm chart is already installed
+    # Set release names
+    - FLUENT_BIT_RELEASE=my-fluent-bit
+    - REDIS_RELEASE=my-redis
+    - NGINX_RELEASE=my-nginx
+    - POSTGRES_RELEASE=my-postgresql
+    - PROMETHEUS_RELEASE=my-prometheus
+    - INGRESS_NAME=my-ingress-ctrl
+    - KASTEN_RELEASE=my-kasten
 
-   # - helm install redis bitnami/redis
-   # - helm install postgresql bitnami/postgresql
+    # Install Fluent Bit from Helm Repo
+    - |
+      if ! helm list -n default --all --short | grep -q "^$FLUENT_BIT_RELEASE$"; then
+       echo "Installing Helm chart $FLUENT_BIT_RELEASE..."
+       helm install $FLUENT_BIT_RELEASE fluent/fluent-bit --namespace default
+      else
+        echo "Helm chart $FLUENT_BIT_RELEASE is already installed"
+      fi
+
+    # Install Redis using Helm
+    - |
+      if ! helm list -n default --all --short | grep -q "^$REDIS_RELEASE$"; then
+        echo "Installing Helm chart $REDIS_RELEASE..."
+        helm install $REDIS_RELEASE bitnami/redis --namespace default
+      else
+        echo "Helm chart $REDIS_RELEASE is already installed"
+      fi
+
+    # Install Nginx server using Helm
+    - |
+      if ! helm list -n default --all --short | grep -q "^$NGINX_RELEASE$"; then
+        echo "Installing Helm chart $NGINX_RELEASE..."
+        helm install $NGINX_RELEASE bitnami/nginx --namespace default
+      else
+        echo "Helm chart $NGINX_RELEASE is already installed"
+      fi
+
+    # Install PostgreSQL using Helm
+    - |
+      if ! helm list -n default --all --short | grep -q "^$POSTGRES_RELEASE$"; then
+       echo "Installing Helm chart $POSTGRES_RELEASE..."
+       helm install $POSTGRES_RELEASE bitnami/postgresql --namespace default
+      else
+        echo "Helm chart $POSTGRES_RELEASE is already installed"
+      fi
+
+    # Install Prometheus using Helm
+    - |
+      if ! helm list -n default --all --short | grep -q "^$PROMETHEUS_RELEASE$"; then
+       echo "Installing Helm chart $PROMETHEUS_RELEASE..."
+       helm install $PROMETHEUS_RELEASE prometheus-community/prometheus --namespace default
+      else
+       echo "Helm chart $PROMETHEUS_RELEASE is already installed"
+      fi
+
     # Check if nginx-ingress Helm chart is already installed
-    # - |
-    #   RELEASE_NAME=my-ingress-ctrl
-    #   if ! helm list -n ingress --all --short | grep -q "^$RELEASE_NAME$"; then
-    #     echo "Installing Helm chart $RELEASE_NAME..."
-    #     helm install $RELEASE_NAME ingress-nginx/ingress-nginx --namespace default --version 4.7.1 
-    #   else
-    #     echo "Helm chart $RELEASE_NAME is already installed"
-    #   fi
+    - |
+      if ! helm list -n ingress --all --short | grep -q "^$INGRESS_NAME$"; then
+        echo "Installing Helm chart $RELEASE_NAME..."
+        helm install $RELEASE_NAME ingress-nginx/ingress-nginx --namespace default --version 4.7.1 
+      else
+        echo "Helm chart $RELEASE_NAME is already installed"
+      fi
 
-   # - helm install k10 kasten/k10
-   # - helm install fluent-bit fluent/fluent-bit
-   # - helm install prometheus prometheus-community/prometheus
+    # Install Kasten K10 using Helm
+    - |  
+      if ! helm list -n default --all --short | grep -q "^$KASTEN_RELEASE$"; then
+       echo "Installing Helm chart $KASTEN_RELEASE..."
+         helm install $KASTEN_RELEASE kasten/k10 --namespace default
+      else
+       echo "Helm chart $KASTEN_RELEASE is already installed"
+      fi
 
-    - kubectl create namespace argocd
     - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
     - kubectl apply -n argocd -f https://raw.githubusercontent.com/marcusmvbs/SRE-argoCD-Proj-2/main/charts/application.yaml
 
