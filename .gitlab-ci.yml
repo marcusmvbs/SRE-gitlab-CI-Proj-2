@@ -153,9 +153,10 @@ ansible_configure:
       else
        echo "Helm chart $KASTEN_RELEASE is already installed"
       fi
-
+      
+    - pwd
     - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-    - kubectl apply -f application.yaml
+    - kubectl apply -f ../application.yaml
    
   needs:
     - job: apply
