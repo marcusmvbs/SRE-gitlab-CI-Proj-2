@@ -163,8 +163,8 @@ ansible_configure:
   needs:
     - job: apply
       artifacts: true
- # rules:
- #   - if: '$CI_COMMIT_BRANCH == "main"'
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
 destroy:
   stage: destroy
