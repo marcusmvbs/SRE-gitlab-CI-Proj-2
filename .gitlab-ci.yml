@@ -46,6 +46,8 @@ validate:
   stage: validate
   script:
     - terraform validate
+  except:
+    - main
 
 plan:
   stage: plan
@@ -58,7 +60,7 @@ plan:
       - terraform/planfile
       - terraform/default.tfstate
   except:
-    - branches@projects_mvbs/sre-gitlabci-proj-2
+    - main
 
 apply:
   stage: apply
@@ -71,7 +73,7 @@ apply:
     - job: plan
       artifacts: true
   except:
-    - branches@projects_mvbs/sre-gitlabci-proj-2
+    - main
 
 ansible_configure:
   stage: ansible_configure
@@ -84,7 +86,7 @@ ansible_configure:
     - job: apply
       artifacts: true
   except:
-    - branches@projects_mvbs/sre-gitlabci-proj-2
+    - main
 
 destroy:
   stage: destroy
@@ -94,4 +96,4 @@ destroy:
     - plan
   when: manual
   except:
-    - branches@projects_mvbs/sre-gitlabci-proj-2
+    - main
