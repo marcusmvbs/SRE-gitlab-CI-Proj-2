@@ -1,0 +1,28 @@
+---
+- name: Update pkg & install Openssl Helm on localhost
+  hosts: terraform-host
+  become: yes # to ensure they are executed with elevated privileges (root) if required
+  tasks:
+    - name: Update package repositories
+      community.general.apk:
+        update_cache: yes
+
+    - name: Install OpenSSL (required for Helm installation)
+      community.general.apk:
+        name: openssl
+        state: latest
+
+    - name: Download and Install Helm
+      shell: "curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | sh"
+      register: helm_install_result
+      changed_when: helm_install_result.stdout_lines
+    
+    - name: Display Helm installation status
+      debug:
+        msg: "Helm {{ 'installed' if helm_install_result.stdout_lines else 'already installed' }}"
+
+    - name: Add Helm repository nginx-ingress controller
+      ansible.builtin.command: helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+
+    - name: Update Helm repositories
+      ansible.builtin.command: helm repo update
