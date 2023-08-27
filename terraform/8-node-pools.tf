@@ -16,7 +16,7 @@ resource "google_container_node_pool" "general" { # This node will be used for g
       role = "general"
     }
 
-    service_account = "gke-terraform@pioneering-rex-394919.iam.gserviceaccount.com"
+    service_account = var.service_account_email
     oauth_scopes = [ 
         "https://www.googleapis.com/auth/cloud-platform" 
     ]
@@ -51,7 +51,7 @@ resource "google_container_node_pool" "spot" { #spot machines are available base
         effect = "NO_SCHEDULE"
     }
 
-    service_account = "gke-terraform@pioneering-rex-394919.iam.gserviceaccount.com"
+    service_account = var.service_account_email
     oauth_scopes = [ 
         "https://www.googleapis.com/auth/cloud-platform" 
     ]

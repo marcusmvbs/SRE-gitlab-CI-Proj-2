@@ -11,9 +11,6 @@ stages:
   - ansible_configure
   - destroy
 
-variables:
-  KUBE_CONFIG_PATH: "/builds/projects_mvbs/gcp-iac-gitlab/ansible/templates"
-
 before_script: 
   - apk update
   - apk add --no-cache gnupg python3 py3-crcmod py3-pip
@@ -83,46 +80,8 @@ ansible_configure:
   script:
     - cd ../ansible/
     - ansible-playbook -i inventory.ini playbook.yaml
-
-    - helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-    - helm repo add bitnami https://charts.bitnami.com/bitnami
-    - helm repo add nginx-stable https://helm.nginx.com/stable
-    - helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-    - helm repo update
-
     - gcloud container clusters get-credentials primary --zone=us-central1-a --project=pioneering-rex-394919
 
-    # Check if ingress Helm chart is already installed
-    - |
-      RELEASE_NAME=my-ingress-ctrl
-      if ! helm list -n ingress --all --short | grep -q "^$RELEASE_NAME$"; then
-        echo "Installing Helm chart $RELEASE_NAME..."
-        helm install $RELEASE_NAME ingress-nginx/ingress-nginx --namespace ingress --version 4.7.1 --values values.yaml --create-namespace
-      else
-        echo "Helm chart $RELEASE_NAME is already installed"
-      fi
-
-    # Check if webserver Helm chart is already installed
-    - |
-      CHART_REPO=oci://registry-1.docker.io/bitnamicharts/nginx
-      RELEASE_NAME=nginx-web
-      if ! helm list -n default --all --short | grep -q "^$RELEASE_NAME$"; then
-        echo "Installing Helm chart $RELEASE_NAME..."
-        helm install $RELEASE_NAME $CHART_REPO --namespace default
-      else
-        echo "Helm chart $RELEASE_NAME is already installed"
-      fi
-
-   # - helm install my-postgresql bitnami/postgresql
-
-   # - helm install my-prometheus prometheus-community/prometheus
-
-    - kubectl apply -f $KUBE_CONFIG_PATH/nginx_ingress.yaml
-    - kubectl apply -f $KUBE_CONFIG_PATH/nginx_server.yaml 
-   # - kubectl apply -f $KUBE_CONFIG_PATH/db_postgresql.yaml 
-   # - kubectl apply -f $KUBE_CONFIG_PATH/prometheus.yaml
-
-    - cd ../terraform/
   needs:
     - job: apply
       artifacts: true
