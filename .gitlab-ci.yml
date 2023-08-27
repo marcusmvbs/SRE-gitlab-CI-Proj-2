@@ -49,6 +49,8 @@ validate:
   stage: validate
   script:
     - terraform validate
+  except:
+    - branches@projects_mvbs/sre-gitlabci-proj-2
 
 plan:
   stage: plan
