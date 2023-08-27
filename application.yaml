@@ -18,11 +18,11 @@ spec:
       selfHeal: true
       prune: true
   applications:
-    # - name: redis
-    #   source:
-    #     path: charts/dev/cache
-    #   destination:
-    #     namespace: cache-ns
+    - name: redis
+      source:
+        path: charts/dev/cache
+      destination:
+        namespace: default
 
     - name: ingress-controller
       source:
@@ -54,8 +54,8 @@ spec:
     #   destination:
     #     namespace: monitoring-ns
 
-    # - name: sql-database
-    #   source:
-    #     path: charts/dev/sql-database
-    #   destination:
-    #     namespace: database-ns
+    - name: sql-database
+      source:
+        path: charts/dev/sql-database
+      destination:
+        namespace: default
