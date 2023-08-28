@@ -138,7 +138,7 @@ ansible_configure:
 
     # Install nginx-ingress using Helm
     - |
-      if ! helm list -n ingress --all --short | grep -q "^$INGRESS_NAME$"; then
+      if ! helm list -n default --all --short | grep -q "^$INGRESS_NAME$"; then
         echo "Installing Helm chart $RELEASE_NAME..."
         helm install $INGRESS_NAME ingress-nginx/ingress-nginx --namespace default
       else
@@ -148,8 +148,8 @@ ansible_configure:
     # Install Kasten K10 using Helm
     - |  
       if ! helm list -n default --all --short | grep -q "^$KASTEN_RELEASE$"; then
-       echo "Installing Helm chart $KASTEN_RELEASE..."
-         helm install $KASTEN_RELEASE kasten/k10 --namespace default
+        echo "Installing Helm chart $KASTEN_RELEASE..."
+        helm install $KASTEN_RELEASE kasten/k10 --namespace default
       else
        echo "Helm chart $KASTEN_RELEASE is already installed"
       fi
@@ -157,10 +157,10 @@ ansible_configure:
     # Create the argocd namespace if it doesn't exist
     - |
       if ! kubectl get namespace argocd &> /dev/null; then
-         echo "Creating namespace argocd..."
-          kubectl create namespace argocd
+        echo "Creating namespace argocd..."
+        kubectl create namespace argocd
       else
-         echo "Namespace argocd already exists."
+        echo "Namespace argocd already exists."
       fi
 
     - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
