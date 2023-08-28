@@ -140,9 +140,9 @@ ansible_configure:
     - |
       if ! helm list -n ingress --all --short | grep -q "^$INGRESS_NAME$"; then
         echo "Installing Helm chart $RELEASE_NAME..."
-        helm install $RELEASE_NAME ingress-nginx/ingress-nginx --namespace default
+        helm install $INGRESS_NAME ingress-nginx/ingress-nginx --namespace default
       else
-        echo "Helm chart $RELEASE_NAME is already installed"
+        echo "Helm chart $INGRESS_NAME is already installed"
       fi
 
     # Install Kasten K10 using Helm
