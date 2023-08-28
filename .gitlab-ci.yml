@@ -154,6 +154,15 @@ ansible_configure:
        echo "Helm chart $KASTEN_RELEASE is already installed"
       fi
 
+    # Create the argocd namespace if it doesn't exist
+    - |
+      if ! kubectl get namespace argocd &> /dev/null; then
+         echo "Creating namespace argocd..."
+          kubectl create namespace argocd
+      else
+         echo "Namespace argocd already exists."
+      fi
+
     - kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
     - kubectl apply -f ../application.yaml
    
