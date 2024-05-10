@@ -1,8 +1,10 @@
-resource "google_project_service" "compute" { # Resource to be able to create a VPC
+# Resource to be able to create a VPC
+resource "google_project_service" "compute" { 
   service = "compute.googleapis.com"
 }
 
-resource "google_project_service" "container" { # Resource to create a Kubernetes cluster
+# Resource to create a Kubernetes cluster
+resource "google_project_service" "container" { 
   service = "container.googleapis.com"
 }
 
@@ -11,7 +13,7 @@ resource "google_compute_network" "vpc" {
   name                            = "vpc"
   routing_mode                    = "REGIONAL"
   auto_create_subnetworks         = false
-  mtu                             = 1460 # maximum transmission unit (bytes)
+  mtu                             = 1460 # Max transmission unit (bytes)
   delete_default_routes_on_create = false
   
   depends_on = [ google_project_service.compute,

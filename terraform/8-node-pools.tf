@@ -17,7 +17,7 @@ resource "google_container_node_pool" "general" { # This node will be used for g
     }
 
     service_account = var.service_account_email
-    oauth_scopes = [ 
+    oauth_scopes    = [ 
         "https://www.googleapis.com/auth/cloud-platform" 
     ]
   }
@@ -46,8 +46,8 @@ resource "google_container_node_pool" "spot" { #spot machines are available base
     }
 
     taint { # it specifies the instance detail to be allocated
-        key = "instance_type"
-        value = "spot"
+        key    = "instance_type"
+        value  = "spot"
         effect = "NO_SCHEDULE"
     }
 

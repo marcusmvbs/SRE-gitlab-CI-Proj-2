@@ -12,30 +12,9 @@ stages:
   - destroy
 
 before_script: 
-  - apk update
-  - apk add --no-cache gnupg python3 py3-crcmod py3-pip
-  - pip install google-auth google-auth-httplib2 google-auth-oauthlib
-  - apk add --no-cache ansible curl
-  - ansible-galaxy collection install kubernetes.core
-
-  - mkdir -p ./creds
-  - echo $serviceaccount | base64 -d > ./creds/service_account.json
-
-  - curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-443.0.0-linux-x86_64.tar.gz
-  - tar -xzf google-cloud-cli-443.0.0-linux-x86_64.tar.gz -C /usr/local/
-  - ln -s /usr/local/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud # folder link
-
-  - gcloud components install kubectl
-  - gcloud components update
-  - gcloud config set core/disable_usage_reporting true
-  - gcloud config set component_manager/disable_update_check true
-  - gcloud --version
-  - gcloud auth activate-service-account --key-file=./creds/service_account.json
-
-  - echo 'export PATH=$PATH:/usr/local/google-cloud-sdk/bin' >> /etc/profile
-  - source /etc/profile
-  
+  - sh ./install_pkg.sh 
   - cd terraform/
+  - echo $tfvars | base64 -d > ./terraform.tfvars
   - /usr/local/google-cloud-sdk/bin/gsutil cp gs://tf-state-bucket-mvb/default.tfstate .
   - chmod +x /usr/local/google-cloud-sdk/bin/gsutil
   - rm -rf .terraform
@@ -52,7 +31,7 @@ validate:
 plan:
   stage: plan
   script:
-    - terraform plan -out "planfile" # Reads the config file and compares to current state
+    - terraform plan -var-file="terraform.tfvars" -out "planfile" 
   dependencies:
     - validate
   artifacts:
@@ -65,7 +44,7 @@ plan:
 apply:
   stage: apply
   script:
-    - terraform apply -input=false "planfile"
+    - terraform apply "planfile"
   dependencies:
     - plan
   when: manual

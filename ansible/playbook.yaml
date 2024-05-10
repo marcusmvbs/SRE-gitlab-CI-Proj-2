@@ -1,14 +1,14 @@
 ---
 - name: Update pkg & install Openssl Helm on localhost
   hosts: terraform-host
-  become: yes # exec as root
+  become: yes
   tasks:
     # Basic tasks to install helm 
     - name: Update package repositories
       community.general.apk:
         update_cache: yes
 
-    - name: Install OpenSSL (required for Helm installation)
+    - name: Install OpenSSL (Secure Sockets Layer - required for Helm installation)
       community.general.apk:
         name: openssl
         state: latest
@@ -45,4 +45,4 @@
     - name: Update Helm Repositories
       ansible.builtin.command: helm repo update
 
-    # Helm install tasks - Work in progress
+    # Helm install tasks
